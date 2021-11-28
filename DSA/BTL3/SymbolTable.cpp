@@ -87,6 +87,13 @@ bool  SymbolTable::cat_str(const string s,string lenh,string &x,string &val,int 
          
         return false;    
     }
+    if(lenh=="LOOKUP" ) // ham lookup ma ngoai id con co cai khac
+    {
+        if(s[i]==' ')
+        return false;
+        else if(s[i]=='\0') return true;
+    }
+    
     if(lenh=="INSERT" && s[i]!='\0')
     {
         string temp=s.substr(i+1,s.length()-i-1);
@@ -113,74 +120,6 @@ bool  SymbolTable::cat_str(const string s,string lenh,string &x,string &val,int 
         else { return false;}
     }
     return true;
-    /*i++;
-    int dem_dau_nhay=0;
-    if(i>=s.length())
-    {
-        this->Clear();
-        throw InvalidInstruction(s);
-
-    }
-    while(s[i]!='\0' )
-    {
-        if(s[i]==' ')
-        {
-            if(dem_dau_nhay==0)
-            {
-                break;
-            }
-        }
-        if(s[i]=='\'')
-        {
-            dem_dau_nhay=1-dem_dau_nhay;
-        }
-        val_type+=s[i];
-        i++;
-    }
-    if(!stic)   //. stic false thi khong can tinh static (ham assign)
-    {
-        if(s[i]!='\0'){ 
-            this->Clear();
-            throw InvalidInstruction(s);
-            }
-        return;
-    }
-    i++;
-    if(i>=s.length())
-    {
-        this->Clear();
-
-        throw InvalidInstruction(s);
-
-    }
-
-
-    string _stic="";
-    while(s[i]!=' ' && s[i]!='\0')
-    {
-        _stic+=s[i];
-        i++;
-    }
-
-    if(_stic=="false") 
-    { 
-        stic=false;
-    }
-    else if(_stic=="true")
-    {
-        stic=true;
-    }
-    else
-    {
-        this->Clear();
-         throw InvalidInstruction(s);
-    }
-
-    if(s[i]!='\0'){ 
-        this->Clear();
-        throw InvalidInstruction(s);
-        }
-    */
 
 }
 int  SymbolTable::module(string s,int t)
@@ -208,13 +147,17 @@ int SymbolTable::hashing(string val,int &num_jump,bool insert)
     {
          h1=this->module(val,this->m),h2=1+this->module(val,this->m-2),hp=h1,i=0;
     }
-    while(!(this->arr.vail[hp]))
+    while(this->arr.STATUS[hp]!=nil)
         {
-            if(val==this->arr.key[hp])
+            if(this->arr.STATUS[hp]==not_nil && val==this->arr.key[hp])
             {
                 if(insert)
                 return -1;
                 else return hp;
+            }
+            if(this->arr.STATUS[hp]==deleted && insert)
+            {
+                return hp;
             }
             i++;
             num_jump++;
@@ -291,14 +234,14 @@ void SymbolTable::phuong_phap(string s)
         i++;
         }
     }
-    this->arr=llist(this->m);
+    this->arr=mang(this->m);
 }
 void SymbolTable::so_sanh_type(string s,string &a,string &b)
 {
     if(a=="" && b=="")
     {
         this->Clear();
-        throw TypeCannotBeInfered(s);
+        throw TypeCannotBeInferred(s);
     }
     if(a!="" && b!="" && a!=b)
     {
@@ -327,7 +270,7 @@ void SymbolTable::Insert(string s)
         throw Redeclared(s);
     }
     cout<<num_jump<<endl;
-    this->arr.vail[vt]=false;
+    this->arr.STATUS[vt]=not_nil;
     this->arr.key[vt]=key;
     node *temp=this->arr.get_index(vt);
     temp->ID=id;
@@ -362,7 +305,7 @@ int SymbolTable::search(string s,string id,int &num_jump)
     {
         this->Clear();
        // cout<<id<<endl;
-        throw Undeclared(s);
+        throw Undeclared(id);
     }
     num_jump+=jump;
     return vt;
@@ -521,6 +464,21 @@ void SymbolTable::Call(string s)
     call_fun(s,ham,num_jump);
     cout<<num_jump<<endl;
 }
+void SymbolTable::LookUp(string s)
+{
+    string id,val;
+    int num_thamso;
+    bool kiem_tra=this->cat_str(s,"LOOKUP",id,val,num_thamso);
+    if(!kiem_tra)
+    {
+        this->Clear();
+        throw InvalidInstruction(s);
+    }
+    int num_jump=0;
+    int vt=this->search(s,id,num_jump);
+    cout<<num_jump<<endl;
+    
+}
 void SymbolTable::Begin()
 {
     this->block++;
@@ -535,18 +493,20 @@ void SymbolTable::End()
     node *p=this->arr.head;
     for(int i=0;i<this->arr.count;i++)
     {
-        if(p->block_==this->block && !(this->arr.vail[i]) )
+        if(p->block_==this->block && this->arr.STATUS[i]==not_nil )
         {
-            this->arr.vail[i]=true;
+            this->arr.STATUS[i]=deleted;
             this->arr.key[i]="";
             p->fun=false;
-            p->num_of_parameters=0;
+            
             p->ID="";
             p->type="";
             p->val="";
             p->block_=0;
             this->count--;
+            if(p->num_of_parameters!=0)
             delete[] p->ThamSo;
+            p->num_of_parameters=0;
         }
         p=p->next;
         
@@ -561,7 +521,7 @@ void SymbolTable::Print()
     bool is_print=false;
     for(int i=0;i<this->m;i++)
     {
-        if(!(this->arr.vail[i]))
+        if(this->arr.STATUS[i]==not_nil)
         {
             if(is_print)
             cout<<" ";
@@ -608,6 +568,10 @@ void SymbolTable::run(string filename)
         else if(s.find("CALL")<s.length())
         {
             this->Call(s);
+        }
+        else if(s.find("LOOKUP")<s.length())
+        {
+            this->LookUp(s);
         }
         else 
         {

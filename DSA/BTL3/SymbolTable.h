@@ -1,6 +1,12 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 #include "main.h"
+enum Status{
+     nil=0,
+     deleted=-1,
+     not_nil=1
+    
+};
 class node {
         public:
             node()
@@ -11,6 +17,14 @@ class node {
                 next=nullptr;
                 fun=false;
                 block_=0; num_of_parameters=0;
+            }
+            void make_parameters(int n)
+            {
+                this->ThamSo=new string[n];
+                for(int i=0;i<n;i++)
+                {
+                    this->ThamSo[i]="";
+                }
             }
             
             ~node(){};
@@ -26,24 +40,24 @@ class SymbolTable
 {
 private: 
     
-    class llist
+    class mang
     {
         public:
         node *head;
-        bool *vail;
+        Status *STATUS;
         string *key;
         int count;
         
-            llist()
+            mang()
             {
                 head=nullptr;
             }
-            llist(int size)
+            mang(int size)
             {
                 this->count=size;
-                this->vail=new bool[size];
+                this->STATUS=new Status[size];
                 this->key=new string[size];
-                for(int i=0;i<size;i++) this->key[i]="",this->vail[i]=true;
+                for(int i=0;i<size;i++) this->key[i]="",this->STATUS[i]=nil;
                 this->head=new node();
                 node *p=this->head;
                 for(int i=1;i<this->count;i++)
@@ -74,15 +88,19 @@ private:
                 {
                     node *q=p;
                     p=p->next;
+                    if(q->num_of_parameters!=0)
+                    {
+                        delete[] q->ThamSo;
+                    }
                     delete q;
                 }
-                delete[] vail;
+                delete[] STATUS;
                 delete[] key;
             }
 
 
     };
-    llist arr;
+    mang arr;
     int block=0,count=0;
     int m,c1,c2;
     string pp,key;
