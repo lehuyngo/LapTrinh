@@ -1,0 +1,27 @@
+﻿  Amo.cpp
+  BaseObj.cpp
+  Explosion.cpp
+  main.cpp
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\main.cpp(65,28): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\main.cpp(121,34): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\main.cpp(140,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\main.cpp(141,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\main.cpp(160,22): warning C4018: '<': signed/unsigned mismatch
+  Common_Function.cpp
+  mainObj.cpp
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\mainObj.cpp(97,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\mainObj.cpp(125,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\mainObj.cpp(127,38): warning C4018: '<': signed/unsigned mismatch
+  ThreatObj.cpp
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(17,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(38,27): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(58,34): warning C4244: 'argument': conversion from 'double' to 'const int', possible loss of data
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(65,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(79,35): warning C4244: 'argument': conversion from 'double' to 'const int', possible loss of data
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(90,26): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(93,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(104,32): warning C4244: 'argument': conversion from 'double' to 'const int', possible loss of data
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(109,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Administrator\Desktop\LapTrinh\game\game\game\ThreatObj.cpp(111,37): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
+  game.vcxproj -> C:\Users\Administrator\Desktop\LapTrinh\game\game\Debug\game.exe

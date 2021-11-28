@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31410.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "hocPython", "PythonApplication1\hocPython.pyproj", "{5A450304-A3B7-438C-8BD6-DDC4DDCA2F64}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A450304-A3B7-438C-8BD6-DDC4DDCA2F64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A450304-A3B7-438C-8BD6-DDC4DDCA2F64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {67FAA9D5-6559-43EA-BC9F-F25796247E8F}
+	EndGlobalSection
+EndGlobal
