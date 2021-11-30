@@ -10,6 +10,7 @@ void test(string filename)
         st->run(filename);
     }
     catch (exception &e)
+    
     {
         cout << e.what();
     }

@@ -1,11 +1,11 @@
 #include "SymbolTable.h"
 #define  linear() hp=(h+this->c1*i) % this->m;
 #define  quadratic() hp=(h+this->c1*i+this->c2*i*i)%this->m;
-#define  double() hp=(h1+i*h2)%this->m;
+#define  double() hp=(h1+this->c1*i*h2)%this->m;
 
 string SymbolTable::check_str(string s)
 {   
-    if(s=="number" || s=="string" || s=="false" || s=="true" || s=="static")
+    if(s=="number" || s=="string" || s=="false" || s=="true" || s=="static" || s=="LINEAR" || s=="QUADRATIC" || s=="DOUBLE")
     {
         return "fail";
     }
@@ -93,15 +93,20 @@ bool  SymbolTable::cat_str(const string s,string lenh,string &x,string &val,int 
         return false;
         else if(s[i]=='\0') return true;
     }
-    
     if(lenh=="INSERT" && s[i]!='\0')
     {
         string temp=s.substr(i+1,s.length()-i-1);
-        if(temp.find(" ")<temp.length())
-            {
-                return false;
-            }
+        if(check_str(temp)!="number")
+        {
+            return false;
+        }
+        if(this->block!=0)
+        {
+            this->Clear();
+            throw InvalidDeclaration(x);
+        }
         num_thamso=stoi(temp) ;  ////
+        
         return true;
     }
     if(lenh=="ASSIGN")
@@ -131,31 +136,47 @@ int  SymbolTable::module(string s,int t)
     return res;
 }
 
-int SymbolTable::hashing(string val,int &num_jump,bool insert)
+int SymbolTable::hashing(string s,string val,int &num_jump,bool insert)
 {
     int h,h1,h2,hp,i=0;
     if(this->pp=="LINEAR")
     {
-         h=this->module(val,this->m),hp=h,i=0;
+         h=this->module(val,this->m),hp=h;
     }
         
     if(this->pp=="QUADRATIC")
     {
-         h=this->module(val,this->m),hp=h,i=0;
+         h=this->module(val,this->m),hp=h;
     }
     if(this->pp=="DOUBLE")
     {
-         h1=this->module(val,this->m),h2=1+this->module(val,this->m-2),hp=h1,i=0;
+         h1=this->module(val,this->m),h2=1+this->module(val,this->m-2),hp=h1;
     }
+    //cout<<this->pp<<endl;
     while(this->arr.STATUS[hp]!=nil)
         {
+            //cout<<hp<<endl;
+            if(i>this->m)
+            {
+
+                if(insert) 
+                {
+                    this->Clear();
+                    throw Overflow(s);
+                }
+                else
+                {
+                    return -1;
+                }
+            }
             if(this->arr.STATUS[hp]==not_nil && val==this->arr.key[hp])
             {
+
                 if(insert)
                 return -1;
                 else return hp;
             }
-            if(this->arr.STATUS[hp]==deleted && insert)
+            if(this->arr.STATUS[hp]!=not_nil && insert)
             {
                 return hp;
             }
@@ -165,7 +186,7 @@ int SymbolTable::hashing(string val,int &num_jump,bool insert)
             {
                 linear();
             }
-            else if(this->pp=="QUADRTIC")
+            else if(this->pp=="QUADRATIC")
             {
                 quadratic();
             }
@@ -196,6 +217,7 @@ void SymbolTable::phuong_phap(string s)
     else 
     { 
         //cout<<1<<endl;
+        this->Clear();
         throw InvalidInstruction(s);
     }
     this->m=0;
@@ -208,8 +230,10 @@ void SymbolTable::phuong_phap(string s)
     while(s[i]!=' ')
     {
         if(s[i]<'0'|| s[i]>'9')
-        //cout<<2<<endl,
-        throw InvalidInstruction(s);
+        {
+            this->Clear();
+            throw InvalidInstruction(s);
+        }
         this->m=this->m*10+(int)s[i]-48;
         i++;
     }
@@ -217,8 +241,10 @@ void SymbolTable::phuong_phap(string s)
     while(s[i]!=' ' && s[i]!='\0')
     {
         if(s[i]<'0'|| s[i]>'9')
-        //cout<<"3"<<endl,
-        throw InvalidInstruction(s);
+        {
+            this->Clear();
+            throw InvalidInstruction(s);
+        }
         this->c1=this->c1*10+(int)s[i]-48;
         i++;
     }
@@ -228,12 +254,15 @@ void SymbolTable::phuong_phap(string s)
         while(s[i]!=' ' && s[i]!='\0')
         {
         if(s[i]<'0'|| s[i]>'9')
-        //cout<<4<<endl,
-        throw InvalidInstruction(s);
+        {
+            this->Clear();
+            throw InvalidInstruction(s);
+        }
         this->c2=this->c2*10+(int)s[i]-48;
         i++;
         }
     }
+    //cout<<" m " <<this->m<<"  c1 "<<this->c1<<"   c2 "<<this->c2<<endl;
     this->arr=mang(this->m);
 }
 void SymbolTable::so_sanh_type(string s,string &a,string &b)
@@ -263,32 +292,29 @@ void SymbolTable::Insert(string s)
     string val="",id="";
     this->cat_str(s,"INSERT",id,val,num_thamso);
     string key=make_key(id,this->block);
-    int vt=this->hashing(key,num_jump,true);
+    int vt=this->hashing(s,key,num_jump,true);
     if(vt==-1)
     {
         this->Clear();
-        throw Redeclared(s);
+        throw Redeclared(id);
     }
-    cout<<num_jump<<endl;
     this->arr.STATUS[vt]=not_nil;
     this->arr.key[vt]=key;
+
     node *temp=this->arr.get_index(vt);
     temp->ID=id;
     temp->block_=this->block;
     if(num_thamso!=0)
     {
-        if(this->block!=0)
-        {
-            this->Clear();
-            throw InvalidDeclaration(s);
-        }
         temp->fun=true;
         temp->num_of_parameters=num_thamso;
         temp->ThamSo=new string[num_thamso];
         for(int i=0;i<num_thamso;i++)
         temp->ThamSo[i]="";
     }
+
     this->count++;
+    cout<<num_jump<<endl;
 
 }
 int SymbolTable::search(string s,string id,int &num_jump)
@@ -297,14 +323,14 @@ int SymbolTable::search(string s,string id,int &num_jump)
     do
     {
         string key=this->make_key(id,i);
-        vt=hashing(key,jump,false);
+        jump=0;
+        vt=hashing(s,key,jump,false);
         i--;
     }
     while (i>=0 && vt==-1);
     if(vt==-1)
     {
         this->Clear();
-       // cout<<id<<endl;
         throw Undeclared(id);
     }
     num_jump+=jump;
@@ -326,7 +352,7 @@ void SymbolTable::Assign(string s)
         node *node_fun=call_fun(s,val,num_jump);
         int vt_id=this->search(s,id,num_jump);
         node *node_id=this->arr.get_index(vt_id);
-        if(node_id->fun)
+        if(node_fun->type=="void" ||node_id->fun )
         {
             this->Clear();
             throw TypeMismatch(s);
@@ -338,6 +364,11 @@ void SymbolTable::Assign(string s)
     }
 
     string type_of_val=this->check_str(val);
+    if(type_of_val=="fail")
+    {
+        this->Clear();
+        throw InvalidInstruction(s);
+    }
     if(type_of_val=="ID")
     {
             node *node_id,*node_val;
@@ -356,6 +387,11 @@ void SymbolTable::Assign(string s)
                 throw Undeclared(s);
             }
             node_id=this->arr.get_index(vt);
+            if(node_id->fun)
+            {
+                this->Clear();
+                throw TypeMismatch(s);
+            }
             this->so_sanh_type(s,node_id->type,node_val->type);
             node_id->val=node_val->val;
             cout<<num_jump<<endl;
@@ -388,6 +424,11 @@ void SymbolTable::Assign(string s)
 node *SymbolTable::call_fun(string s,string ham,int &num_jump)
 {
     int v=ham.find("(");
+    if(v>=ham.length())
+    {
+        this->Clear();
+        throw InvalidInstruction(s);
+    }
     int vt=0;
 
     string name_fun=ham.substr(0,v);
@@ -399,7 +440,6 @@ node *SymbolTable::call_fun(string s,string ham,int &num_jump)
         throw TypeMismatch(s);
     }
     string cum_tham_so=ham.substr(v+1,s.length()-v-1),a_thamso="";
-    //cout<<cum_tham_so<<endl;
     int i=0,vt_thamso=0;
     while(cum_tham_so[i]!='\0')   //kiem tra cac tham so co dung ko
     {
@@ -431,6 +471,7 @@ node *SymbolTable::call_fun(string s,string ham,int &num_jump)
                     if(node_thamso->fun==true)
                     {
                         this->Clear();
+                
                         throw TypeMismatch(s);
                     }
                     this->so_sanh_type(s,node_thamso->type,node_fun->ThamSo[vt_thamso]);   
@@ -441,9 +482,10 @@ node *SymbolTable::call_fun(string s,string ham,int &num_jump)
                 }
                 if(cum_tham_so[i]==')')
                 { 
-                    if(vt<node_fun->num_of_parameters-1)
+                    if(vt_thamso<node_fun->num_of_parameters-1)
                     {
                         this->Clear();
+                        cout<<" sai day"<<endl;
                         throw TypeMismatch(s);
                     }
                     break; 
@@ -461,7 +503,9 @@ void SymbolTable::Call(string s)
 {
     int num_jump=0;
     string ham=s.substr(5,s.length()-5);
-    call_fun(s,ham,num_jump);
+    node *temp=call_fun(s,ham,num_jump);
+    string kieu="void";
+    so_sanh_type(s,kieu,temp->type);
     cout<<num_jump<<endl;
 }
 void SymbolTable::LookUp(string s)
@@ -476,7 +520,7 @@ void SymbolTable::LookUp(string s)
     }
     int num_jump=0;
     int vt=this->search(s,id,num_jump);
-    cout<<num_jump<<endl;
+    cout<<vt<<endl;
     
 }
 void SymbolTable::Begin()
@@ -524,8 +568,8 @@ void SymbolTable::Print()
         if(this->arr.STATUS[i]==not_nil)
         {
             if(is_print)
-            cout<<" ";
-            cout<<p->ID<<"//"<<p->block_;
+            cout<<";";
+            cout<<i<<" "<<p->ID<<"//"<<p->block_;
             is_print=true;
             
         }

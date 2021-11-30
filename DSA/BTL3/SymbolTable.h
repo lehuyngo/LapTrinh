@@ -115,7 +115,7 @@ public:
     void so_sanh_type(string s,string &a,string &b);
     int module(string s,int t);
     string make_key(string id,int block);
-    int hashing(string val,int &num_jump,bool check);
+    int hashing(string s,string val,int &num_jump,bool check);
     bool cat_str(const string s,string lenh,string &x,string &val,int &num_thamso);
     node *call_fun(string s,string ham,int &num_jump);
     int search(string s,string id,int &num_jump);
