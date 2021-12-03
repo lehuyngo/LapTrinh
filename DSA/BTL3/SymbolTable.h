@@ -11,12 +11,11 @@ class node {
         public:
             node()
             {
-                ID="";
                 type="";
                 val="";
                 next=nullptr;
                 fun=false;
-                block_=0; num_of_parameters=0;
+                 num_of_parameters=0;
             }
             void make_parameters(int n)
             {
@@ -28,12 +27,12 @@ class node {
             }
             
             ~node(){};
-            string ID, type, val;
+            string  type, val;
             node *next;
             node  *pre;
             string *ThamSo;
             bool fun;
-            int block_,num_of_parameters;
+            int num_of_parameters;
     
     };
 class SymbolTable
@@ -45,7 +44,8 @@ private:
         public:
         node *head;
         Status *STATUS;
-        string *key;
+        string *ID;
+        int *blocks;
         int count;
         
             mang()
@@ -56,8 +56,9 @@ private:
             {
                 this->count=size;
                 this->STATUS=new Status[size];
-                this->key=new string[size];
-                for(int i=0;i<size;i++) this->key[i]="",this->STATUS[i]=nil;
+                this->ID=new string[size];
+                this->blocks=new int[size];
+                for(int i=0;i<size;i++) this->ID[i]="",this->STATUS[i]=nil,this->blocks[i]=0;
                 this->head=new node();
                 node *p=this->head;
                 for(int i=1;i<this->count;i++)
@@ -95,7 +96,8 @@ private:
                     delete q;
                 }
                 delete[] STATUS;
-                delete[] key;
+                delete[] ID;
+                delete[] blocks;
             }
 
 
@@ -115,7 +117,7 @@ public:
     void so_sanh_type(string s,string &a,string &b);
     int module(string s,int t);
     string make_key(string id,int block);
-    int hashing(string s,string val,int &num_jump,bool check);
+    int hashing(string s,string id,string val,int block_find,int &num_jump,bool check);
     bool cat_str(const string s,string lenh,string &x,string &val,int &num_thamso);
     node *call_fun(string s,string ham,int &num_jump);
     int search(string s,string id,int &num_jump);

@@ -114,9 +114,11 @@ bool  SymbolTable::cat_str(const string s,string lenh,string &x,string &val,int 
         if(s[i]==' ')
         {
             val=s.substr(i+1,s.length()-i-1);
-            if(val.find(" ")<val.length())
+            bool dong_nhay=true;
+            for(unsigned int i=0;i<val.length();i++)
             {
-                return false;
+                if(val[i]==' ' && dong_nhay) return false;
+                if(val[i]=='\'') dong_nhay=!dong_nhay;
             }
             return true;
         
@@ -136,7 +138,7 @@ int  SymbolTable::module(string s,int t)
     return res;
 }
 
-int SymbolTable::hashing(string s,string val,int &num_jump,bool insert)
+int SymbolTable::hashing(string s,string id,string val,int block_find,int &num_jump,bool insert)
 {
     int h,h1,h2,hp,i=0;
     if(this->pp=="LINEAR")
@@ -169,12 +171,19 @@ int SymbolTable::hashing(string s,string val,int &num_jump,bool insert)
                     return -1;
                 }
             }
-            if(this->arr.STATUS[hp]==not_nil && val==this->arr.key[hp])
+            if(this->arr.STATUS[hp]==not_nil && id==this->arr.ID[hp])
             {
 
                 if(insert)
-                return -1;
-                else return hp;
+                {
+                    if(this->block==this->arr.blocks[hp]) return -1;
+                }
+               
+                
+                else
+                {
+                if(block_find==this->arr.blocks[hp])return hp;
+                }
             }
             if(this->arr.STATUS[hp]!=not_nil && insert)
             {
@@ -290,20 +299,24 @@ void SymbolTable::Insert(string s)
     }
     int num_thamso=0,num_jump=0;
     string val="",id="";
-    this->cat_str(s,"INSERT",id,val,num_thamso);
+    if(this->cat_str(s,"INSERT",id,val,num_thamso)==false)
+    {
+        this->Clear();
+        throw InvalidInstruction(s);
+        
+    }
     string key=make_key(id,this->block);
-    int vt=this->hashing(s,key,num_jump,true);
+    int vt=this->hashing(s,id,key,0,num_jump,true);
     if(vt==-1)
     {
         this->Clear();
         throw Redeclared(id);
     }
     this->arr.STATUS[vt]=not_nil;
-    this->arr.key[vt]=key;
+    this->arr.ID[vt]=id;
+    this->arr.blocks[vt]=this->block;
 
     node *temp=this->arr.get_index(vt);
-    temp->ID=id;
-    temp->block_=this->block;
     if(num_thamso!=0)
     {
         temp->fun=true;
@@ -317,21 +330,22 @@ void SymbolTable::Insert(string s)
     cout<<num_jump<<endl;
 
 }
-int SymbolTable::search(string s,string id,int &num_jump)
+int SymbolTable::search(string s,string ID,int &num_jump)
 {
-    int vt=-1,i=this->block,jump=0;
+    int vt=-1,i=this->block,jump;
     do
     {
-        string key=this->make_key(id,i);
+        string key=this->make_key(ID,i);
         jump=0;
-        vt=hashing(s,key,jump,false);
+        vt=hashing(s,ID,key,i,jump,false);
+        //cout<<"block "<<i<<"   jump "<<jump<<endl;
         i--;
     }
     while (i>=0 && vt==-1);
     if(vt==-1)
     {
         this->Clear();
-        throw Undeclared(id);
+        throw Undeclared(ID);
     }
     num_jump+=jump;
     return vt;
@@ -341,12 +355,12 @@ void SymbolTable::Assign(string s)
     
     string id,val;
     int num,num_jump=0;
-    cat_str(s,"ASSIGN",id,val,num);
-    if(check_str(id)!="ID")
+    if(this->cat_str(s,"ASSIGN",id,val,num)==false)
     {
         this->Clear();
         throw InvalidInstruction(s);
     }
+    
     if(val.find("(")<s.length() && val[val.length()-1]==')')
     {   
         node *node_fun=call_fun(s,val,num_jump);
@@ -485,7 +499,6 @@ node *SymbolTable::call_fun(string s,string ham,int &num_jump)
                     if(vt_thamso<node_fun->num_of_parameters-1)
                     {
                         this->Clear();
-                        cout<<" sai day"<<endl;
                         throw TypeMismatch(s);
                     }
                     break; 
@@ -537,16 +550,14 @@ void SymbolTable::End()
     node *p=this->arr.head;
     for(int i=0;i<this->arr.count;i++)
     {
-        if(p->block_==this->block && this->arr.STATUS[i]==not_nil )
+        if(this->arr.blocks[i]==this->block && this->arr.STATUS[i]==not_nil )
         {
             this->arr.STATUS[i]=deleted;
-            this->arr.key[i]="";
+            this->arr.ID[i]="";
             p->fun=false;
             
-            p->ID="";
             p->type="";
             p->val="";
-            p->block_=0;
             this->count--;
             if(p->num_of_parameters!=0)
             delete[] p->ThamSo;
@@ -569,7 +580,7 @@ void SymbolTable::Print()
         {
             if(is_print)
             cout<<";";
-            cout<<i<<" "<<p->ID<<"//"<<p->block_;
+            cout<<i<<" "<<this->arr.ID[i]<<"//"<<this->arr.blocks[i];
             is_print=true;
             
         }
@@ -629,6 +640,7 @@ void SymbolTable::run(string filename)
     {
         throw UnclosedBlock(this->block);
     }
+   
    
    f.close();
 
